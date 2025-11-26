@@ -1,0 +1,124 @@
+PROJECT ID: qwiklabs-gcp-03-ca11a86752e0
+ZONE: us-central1-c
+
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-03-ca11a86752e0/zones/us-central1-c/instances/gcelab2].
+NAME: gcelab2
+ZONE: us-central1-c
+MACHINE_TYPE: e2-medium
+PREEMPTIBLE: 
+INTERNAL_IP: 10.128.0.2
+EXTERNAL_IP: 34.170.68.195
+STATUS: RUNNING
+
+gcloud config list --all
+gcloud components list
+gcloud config list
+
+gcloud compute instances list
+NAME: gcelab2
+ZONE: us-central1-c
+MACHINE_TYPE: e2-medium
+PREEMPTIBLE: 
+INTERNAL_IP: 10.128.0.2
+EXTERNAL_IP: 34.170.68.195
+STATUS: RUNNING
+
+gcloud compute instances list --filter="name=('gcelab2')"
+NAME: gcelab2
+ZONE: us-central1-c
+MACHINE_TYPE: e2-medium
+PREEMPTIBLE: 
+INTERNAL_IP: 10.128.0.2
+EXTERNAL_IP: 34.170.68.195
+STATUS: RUNNING
+
+gcloud compute firewall-rules list
+NAME: default-allow-icmp
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 65534
+ALLOW: icmp
+DENY: 
+DISABLED: False
+
+NAME: default-allow-internal
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 65534
+ALLOW: tcp:0-65535,udp:0-65535,icmp
+DENY: 
+DISABLED: False
+
+NAME: default-allow-rdp
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 65534
+ALLOW: tcp:3389
+DENY: 
+DISABLED: False
+
+NAME: default-allow-ssh
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 65534
+ALLOW: tcp:22
+DENY: 
+DISABLED: False
+
+To show all fields of the firewall, please show in JSON format: --format=json
+To show all fields in table format, please see the examples in --help.
+
+gcloud compute firewall-rules list --filter="network='default'"
+gcloud compute firewall-rules list --filter="NETWORK:'default' AND ALLOW:'icmp'"
+
+gcloud compute ssh gcelab2 --zone $ZONE
+WARNING: The private SSH key file for gcloud does not exist.
+WARNING: The public SSH key file for gcloud does not exist.
+WARNING: You do not have an SSH key for gcloud.
+WARNING: SSH keygen will be executed to generate a key.
+This tool needs to create the directory [/home/student_00_769a9ad21f4d/.ssh] before being able to generate SSH keys.
+
+sudo apt update && sudo apt install -y nginx
+gcloud compute firewall-rules list
+gcloud compute instances add-tags gcelab2 --tags http-server,https-server
+gcloud compute firewall-rules create default-allow-http --direction=INGRESS --priority=1000 --network=default --action=ALLOW --rules=tcp:80 --source-ranges=0.0.0.0/0 --target-tags=http-server
+gcloud compute firewall-rules list --filter=ALLOW:'80'
+NAME: default-allow-http
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 1000
+ALLOW: tcp:80
+DENY: 
+DISABLED: False
+
+To show all fields of the firewall, please show in JSON format: --format=json
+To show all fields in table format, please see the examples in --help.
+
+curl http://$(gcloud compute instances list --filter=name:gcelab2 --format='value(EXTERNAL_IP)')
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+gcloud logging logs list
+gcloud logging logs list --filter="compute"
+gcloud logging read "resource.type=gce_instance" --limit 5

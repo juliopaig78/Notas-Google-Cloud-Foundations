@@ -1,0 +1,197 @@
+Comandos para crear una maquina virtual / Google Cloud
+gcloud auth list
+gcloud config list Project
+
+gcloud config set compute/region us-east1
+export REGION=us-east1
+export ZONE=us-east1-d
+
+sudo apt update && upgrade
+sudo apt-get install nginx
+ps auwx | grep nginx
+gcloud compute instances create gcelab2 --machine-type e2-medium --zone=$ZONE
+Created [https://www.googleapis.com/compute/v1/projects/qwiklabs-gcp-02-917c23294195/zones/us-east1-d/instances/gcelab2].
+NAME: gcelab2
+ZONE: us-east1-d
+MACHINE_TYPE: e2-medium
+PREEMPTIBLE: 
+INTERNAL_IP: 10.142.0.3
+EXTERNAL_IP: 34.75.204.32
+STATUS: RUNNING
+gcloud compute ssh gcelab2 --zone=us-east1-d
+
+git clone https://github.com/GoogleCloudPlatform/python-docs-samples.git
+cd python-docs-samples/appengine/standard_python3/hello_world
+sudo apt update
+sudo apt install -y python3-venv
+python3 -m venv myenv
+source myenv/bin/actívate
+flask --app main run
+nano main.py
+gcloud app deploy
+gcloud app browse
+
+gcloud config set run/region us-east4
+mkdir gcf_hello_world && cd $_
+nano index.js
+const functions = require('@google-cloud/functions-framework');
+
+// Registrar una devolución de llamada de CloudEvent con el framework de Functions que se
+// ejecutará cuando el tema activador de Pub/Sub reciba un mensaje.
+functions.cloudEvent('helloPubSub', cloudEvent => {
+  // El mensaje de Pub/Sub se pasa como la carga útil de CloudEvent.
+  const base64name = cloudEvent.data.message.data;
+
+  const name = base64name
+    ? Buffer.from(base64name, 'base64').toString()
+    : 'World';
+
+  console.log(`Hello, ${name}!`);
+});
+nano package.json
+{
+  "name": "gcf_hello_world",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.0.0"
+  }
+}
+npm install
+added 145 packages, and audited 146 packages in 14s
+
+36 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+gcloud functions deploy nodejs-pubsub-function \
+  --gen2 \
+  --runtime=nodejs20 \
+  --region=us-east4 \
+  --source=. \
+  --entry-point=helloPubSub \
+  --trigger-topic cf-demo \
+  --stage-bucket qwiklabs-gcp-04-a36e8d7d1916-bucket \
+  --service-account cloudfunctionsa@qwiklabs-gcp-04-a36e8d7d1916.iam.gserviceaccount.com \
+  --allow-unauthenticated
+
+gcloud functions describe nodejs-pubsub-function \
+  --region=us-east4 
+buildConfig:
+  automaticUpdatePolicy: {}
+  build: projects/438996816523/locations/us-east4/builds/9eb7b333-07ad-4af5-89b5-5350741f2728
+  dockerRegistry: ARTIFACT_REGISTRY
+  dockerRepository: projects/qwiklabs-gcp-04-a36e8d7d1916/locations/us-east4/repositories/gcf-artifacts
+  entryPoint: helloPubSub
+  runtime: nodejs20
+  serviceAccount: projects/qwiklabs-gcp-04-a36e8d7d1916/serviceAccounts/438996816523-compute@developer.gserviceaccount.com
+  source:
+    storageSource:
+      bucket: gcf-v2-sources-438996816523-us-east4
+      generation: '1761766016518939'
+      object: nodejs-pubsub-function/function-source.zip
+  sourceProvenance:
+    resolvedStorageSource:
+      bucket: gcf-v2-sources-438996816523-us-east4
+      generation: '1761766016518939'
+      object: nodejs-pubsub-function/function-source.zip
+createTime: '2025-10-29T19:26:58.971263515Z'
+environment: GEN_2
+eventTrigger:
+  eventType: google.cloud.pubsub.topic.v1.messagePublished
+  pubsubTopic: projects/qwiklabs-gcp-04-a36e8d7d1916/topics/cf-demo
+  retryPolicy: RETRY_POLICY_DO_NOT_RETRY
+  serviceAccountEmail: cloudfunctionsa@qwiklabs-gcp-04-a36e8d7d1916.iam.gserviceaccount.com
+  trigger: projects/qwiklabs-gcp-04-a36e8d7d1916/locations/us-east4/triggers/nodejs-pubsub-function-060752
+  triggerRegion: us-east4
+labels:
+  deployment-tool: cli-gcloud
+name: projects/qwiklabs-gcp-04-a36e8d7d1916/locations/us-east4/functions/nodejs-pubsub-function
+satisfiesPzi: true
+satisfiesPzs: true
+serviceConfig:
+  allTrafficOnLatestRevision: true
+  availableCpu: '0.1666'
+  availableMemory: 256M
+  environmentVariables:
+    LOG_EXECUTION_ID: 'true'
+  ingressSettings: ALLOW_ALL
+  maxInstanceCount: 5
+  maxInstanceRequestConcurrency: 1
+  revision: nodejs-pubsub-function-00001-fim
+  service: projects/qwiklabs-gcp-04-a36e8d7d1916/locations/us-east4/services/nodejs-pubsub-function
+  serviceAccountEmail: cloudfunctionsa@qwiklabs-gcp-04-a36e8d7d1916.iam.gserviceaccount.com
+  timeoutSeconds: 60
+  uri: https://nodejs-pubsub-function-wfmke6dtuq-uk.a.run.app
+state: ACTIVE
+updateTime: '2025-10-29T19:28:44.260760463Z'
+url: https://us-east4-qwiklabs-gcp-04-a36e8d7d1916.cloudfunctions.net/nodejs-pubsub-function
+
+gcloud pubsub topics publish cf-demo --message="Cloud Function Gen2"
+messageIds:
+- '16884970057436150'
+gcloud functions logs read nodejs-pubsub-function \
+  --region=us-east4 
+LEVEL: 
+NAME: nodejs-pubsub-function
+EXECUTION_ID: ce4cu41d00rh
+TIME_UTC: 2025-10-29 19:30:21.907
+LOG: Hello, Cloud Function Gen2!
+
+
+LEVEL: I
+NAME: nodejs-pubsub-function
+EXECUTION_ID: 
+TIME_UTC: 2025-10-29 19:30:21.725
+LOG: 
+
+LEVEL: I
+NAME: nodejs-pubsub-function
+EXECUTION_ID: 
+TIME_UTC: 2025-10-29 19:28:27.050
+LOG: Default STARTUP TCP probe succeeded after 1 attempt for container "worker" on port 8080.
+
+LEVEL: I
+NAME: nodejs-pubsub-function
+EXECUTION_ID: 
+TIME_UTC: 2025-10-29 19:28:25.926
+LOG: Starting new instance. Reason: DEPLOYMENT_ROLLOUT - Instance started due to traffic shifting between revisions due to deployment, traffic split adjustment, or deployment health check.
+
+
+gcloud config set compute/region us-east4
+gcloud config set compute/zone us-east4-a
+gcloud container clusters create --machine-type=e2-medium --zone=us-east4-a lab-cluster
+Note: Your Pod address range (`--cluster-ipv4-cidr`) can accommodate at most 1008 node(s).
+Creating cluster lab-cluster in us-east4-a... Cluster is being health-checked (Kubernetes Control Plane is healthy)...done.         
+Created [https://container.googleapis.com/v1/projects/qwiklabs-gcp-04-8f9a816f5e45/zones/us-east4-a/clusters/lab-cluster].
+To inspect the contents of your cluster, go to: https://console.cloud.google.com/kubernetes/workload_/gcloud/us-east4-a/lab-cluster?project=qwiklabs-gcp-04-8f9a816f5e45
+kubeconfig entry generated for lab-cluster.
+NAME: lab-cluster
+LOCATION: us-east4-a
+MASTER_VERSION: 1.33.5-gke.1125000
+MASTER_IP: 34.145.145.215
+MACHINE_TYPE: e2-medium
+NODE_VERSION: 1.33.5-gke.1125000
+NUM_NODES: 3
+STATUS: RUNNING
+STACK_TYPE: IPV4
+gcloud container clusters get-credentials lab-cluster
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for lab-cluster.
+kubectl create deployment hello-server --image=gcr.io/google-samples/hello-app:1.0
+eployment.apps/hello-server created
+kubectl expose deployment hello-server --type=LoadBalancer --port 8080
+service/hello-server exposed
+kubectl get service
+NAME           TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)          AGE
+hello-server   LoadBalancer   34.118.227.4   34.85.183.22   8080:32311/TCP   39s
+kubernetes     ClusterIP      34.118.224.1   <none>         443/TCP          7m25s
+http://34.85.183.22:8080
+gcloud container clusters delete lab-cluster
+Deleted [https://container.googleapis.com/v1/projects/qwiklabs-gcp-04-8f9a816f5e45/zones/us-east4-a/clusters/lab-cluster].
+
+
